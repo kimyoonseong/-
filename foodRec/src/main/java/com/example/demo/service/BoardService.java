@@ -1,5 +1,6 @@
 package com.example.demo.service;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,12 +10,16 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Service;
 
+import com.example.demo.controller.BoardController;
 import com.example.demo.model.dto.BoardDto;
 import com.example.demo.model.entity.Board;
 import com.example.demo.model.entity.User;
 import com.example.demo.repository.BoardRepository;
 import com.example.demo.repository.UserRepository;
 
+import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
+@Slf4j
 @Service
 public class BoardService {
 	
@@ -34,15 +39,25 @@ public class BoardService {
 		Board board = dto.toEntity();
 		board.setUser(user);
 		brepo.saveAndFlush(board);
+		log.info("[regist] | id: {} title:{} no:{} ]", dto.getUser_Id(),board.getTitle(),board.getNo());  
+		  
 	}
 	
 	// 전체읽기 - 페이지로 끊어서 값을 가지고 오는 방법 존재 - 221p
 	public Page<Board> listBoard(int page){
 		// 최신순 정렬 - 내림차순
-		Pageable pageable = PageRequest.of(page, 5, Direction.DESC, "no");
+		Pageable pageable = PageRequest.of(page, 10, Direction.DESC, "no");
 		Page<Board> pageInfo = brepo.findAll(pageable);
 		return pageInfo;
 	}
+	public List<Board> searchByTitle(String query) {
+	    // 여기서 실제로 데이터베이스에서 검색 수행
+		
+		List<Board> searchResults = brepo.findByTitleContaining(query); // 값의 존재 확인 가능
+		return searchResults;
+	}
+	
+
 
 	// 하나읽기
 	public Board detailBoard(int no) {
@@ -62,6 +77,13 @@ public class BoardService {
 	public void deleteBoard(int no) {	
 		brepo.deleteById(no);		
 	}
+	
+	@Transactional
+	public void deleteAllBoard(String d_id) {
+		// EntityManager를 사용하는 메서드는 트랜잭션 내에서 실행되어야 합니다. 
+		brepo.deleteAllByUser_Id(d_id);
+	}
+	
 
 	public void plusLike(Integer boardId) {
 //		Board board = dto.toEntity();
@@ -102,23 +124,38 @@ public class BoardService {
 		
 	}
 	
-	// 좋아요 순으로 페이지로 끊어서 값을 가지고 오기
-//	public Page<Board> listRankBoard(int page){
-//		// 좋아요 순 정렬 - 내림차순
-//		Pageable pageable = PageRequest.of(page, 10, Direction.DESC, "like");
-//		//Page<Board> pageInfo = brepo.findAll(pageable);
-//		
-//		 // 좋아요가 null일 때는 0으로 처리
-//	    Page<Board> pageInfo = brepo.findAll(pageable);
-//	    //List<Board> rankedBoards = pageInfo.getContent();
-//
-//	  
-////	    rankedBoards.forEach(board -> {
-////	        if (board.getLike() == null) {
-////	            board.setLike(0);
-////	        }
-////	    });
-//		return pageInfo;
-//		
-//	}
+//	 좋아요 순으로 페이지로 끊어서 값을 가지고 오기
+	public Page<Board> listRankBoard(int page){
+		// 좋아요 순 정렬 - 내림차순
+		Pageable pageable = PageRequest.of(page, 10, Direction.DESC, "likeRecipe");
+		//Page<Board> pageInfo = brepo.findAll(pageable);
+		
+		 // 좋아요가 null일 때는 0으로 처리
+	    Page<Board> pageInfo = brepo.findAll(pageable);
+	    //List<Board> rankedBoards = pageInfo.getContent();
+
+	  
+//	    rankedBoards.forEach(board -> {
+//	        if (board.getLike() == null) {
+//	            board.setLike(0);
+//	        }
+//	    });
+		return pageInfo;
+		
+	}
+	//조회수 증가 로직
+	
+	public void increaseViews(Integer boardId) {
+		Optional<Board> optionalBoard = brepo.findById(boardId);
+
+        if (optionalBoard.isPresent()) {
+            Board board = optionalBoard.get();
+            int currentViews = board.getAllViews1();
+            board.setAllViews1(currentViews + 1);
+            brepo.save(board);
+        } else {
+            throw new RuntimeException("게시물을 찾을 수 없습니다.");
+        }
+    }
+	
 }

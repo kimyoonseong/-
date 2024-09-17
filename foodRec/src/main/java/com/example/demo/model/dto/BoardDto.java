@@ -24,6 +24,8 @@ public class BoardDto {
 	private MultipartFile image;
 	private int likeRecipe;
 	private int unlikeRecipe;
+	private int allViews1;
+	
 	public Board toEntity() {
 		Board board = new Board();
 		board.setNo(this.getNo());
@@ -32,6 +34,8 @@ public class BoardDto {
 		board.setImagePath(this.getImagePath());
 		board.setLikeRecipe(this.getLikeRecipe());
 		board.setUnlikeRecipe(this.getUnlikeRecipe());
+		board.setUnlikeRecipe(this.getUnlikeRecipe());
+		board.setAllViews1(this.getAllViews1());
 		return board;
 	}
 

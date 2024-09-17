@@ -26,13 +26,17 @@ public class Board {
 	@GeneratedValue(strategy=GenerationType.IDENTITY)//자동 글번호 생성
 	private int no;// 게시판 글 번호
 	private String title;//레시피 글 제목
+	@Column(columnDefinition = "LONGTEXT")
 	private String content;//레시피
 	
 	private String imagePath;// 이미지가 저장되는 경로 
 	@Column(nullable = false)
-	private int likeRecipe;
+	private int likeRecipe;//추천
 	 @Column(nullable = false)
-	private int unlikeRecipe;
+	private int unlikeRecipe;//비추천
+	  @Column(nullable = true, columnDefinition = "INT DEFAULT 0")
+	private int allViews1;//게시물 조회수
+	
 	@ManyToOne
 	@JoinColumn(name="user_id")//Select * from user where id=??
 	User user;
@@ -46,6 +50,7 @@ public class Board {
 		dto.setImagePath(this.getImagePath());
 		dto.setLikeRecipe(this.getLikeRecipe());
 		dto.setUnlikeRecipe(this.getUnlikeRecipe());
+		dto.setAllViews1(this.getAllViews1());
 		return dto;
 	}
 }

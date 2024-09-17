@@ -17,7 +17,7 @@
         }
         
         .navbar {
-            height: 140px; /* 네비게이션 바의 높이를 120px로 고정 */	
+            height: 160px; /* 네비게이션 바의 높이를 120px로 고정 */	
         }
 
         h1 {
@@ -31,7 +31,7 @@
 </head>
 <body>
 
-<a href = "/board/test.jsp">feqfeqfS</a>
+
 <div class="container">
     <h1>모두의 레시피</h1>
 
@@ -39,7 +39,7 @@
 
 
 <nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top">
-    <a class="navbar-brand" href="#">My Board</a>
+    <a class="navbar-brand" href="/">모두의 레시피</a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
             aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
@@ -53,9 +53,9 @@
                 
                 <a href="/user/join" class="nav-link">회원가입</a>
             </li>
-            <li class="nav-item">
-                <a class="nav-link" href="/">About</a>
-            </li>
+				<li class="nav-item">
+    			<a href="/board/test" class="nav-link">사진검색</a>
+			</li>
         </ul>
     </div>
     <div class="login-container" style="padding-top:15px">
@@ -88,12 +88,21 @@
         <c:if test="${not empty loginUser}">
             <div class="user-info">
 
-                <p style="color: white">${loginUser.name}님 반갑습니다.</p>
+                <p style="color: white">${loginUser.name}님 반갑습니다.
+                	<form class="form-inline" action="/board/search" method="get">
+		                <div class="input-group">
+		                    <input type="text" class="form-control form-control" id="query" name="query" placeholder="검색어 입력">
+		                    <div class="input-group-append">
+		                        <button type="submit" class="btn btn-outline-light">검색</button>
+		                    </div>
+		                </div>
+		            </form>
+                </p>
                 <a href="/user/logout" class="btn btn-primary">로그아웃</a>
                 <a href="#" onclick="confirmWithdrawal()" class="btn btn-primary">회원탈퇴</a>
                 <a href="/board/regist" class="btn btn-primary">게시글 등록</a>
                 <a href="/board/list" class="btn btn-primary">게시글 목록</a>
-
+				
             </div>
         </c:if>
     </div>
@@ -102,8 +111,6 @@
 </nav>
 
 <div class="container mt-4">
-
-    
 
 
     <hr>

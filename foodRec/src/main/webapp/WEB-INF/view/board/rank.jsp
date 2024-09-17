@@ -1,6 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
 <style>
 .title22 {
@@ -31,7 +32,6 @@ thead {
             color: white;
         }
 </style>
-	
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>글목록</title>
@@ -42,39 +42,27 @@ thead {
     <%@include file="/WEB-INF/view/include/header.jsp"%>
 
     <div class="container mt-4" style="padding-top: 90px">
-    <div>
-    <span class="title22 ">글목록</span>
+        <h1>* 레시피 추천 순위 *</h1>
 
-            <a href="/board/rank" class="btn btn-primary float-right">레시피 랭킹</a>
-            <br>
-    </div>
-        
         <table class="table">
             <thead>
                 <tr>
-                    <th>번호</th>
-                    <th>제목</th>
-                    <th>작성자</th>
-                    <th>추천수</th>
-                    <th>비추천수</th>
-                    <th>조회수</th>
+                  
+                            <th>번호</th>
+		                    <th>제목</th>
+		                    <th>작성자</th>
+		                    <th>추천수</th>
+		                    <th>비추천수</th>
+		                    <th>조회수</th>
+                     
                 </tr>
             </thead>
             <tbody>
                 <c:forEach items="${pageInfo.content}" var="board">
                     <tr>
-                    
-       				 	<td>${board.no}</td>
+                       <td>${board.no}</td>
                         <form action="/board/views" method=post class="form-inline">
        				 	<td>
-       				 	<span class="form-group">
-                <c:if test="${not empty board.imagePath}">
-                    <img src="<%= request.getContextPath() %>/upload/${board.imagePath}" class="img-fluid" alt="이미지" width="30px">
-                </c:if>
-                <c:if test="${empty board.imagePath}">
-                    <img src="/upload/default.png" class="img-fluid" alt="이미지" width="30px">
-                </c:if>
-            </span>
        				 	<button type="submit" class="link-button" name="boardId" value="${board.no}">
         				${board.title}
     					</button>
@@ -90,7 +78,7 @@ thead {
             </tbody>
         </table>
 
-        <form action="/board/list" method="get" class="form-inline">
+        <form action="/board/rank" method="get" class="form-inline">
             <div class="form-group mr-2">
                 <label for="page">페이지:</label>
                 <input type="text" name="page" class="form-control" value="${pageInfo.number + 1}">

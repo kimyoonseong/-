@@ -23,18 +23,23 @@
             height: auto;
             margin-top: 20px;
         }
+        h1 {
+        font-style: bold;}
     </style>
 </head>
 <body>
 
     <%@include file="/WEB-INF/view/include/header.jsp"%>
 
-    <div class="container mt-4" style="padding-top: 90px">
-        <h1>환영합니다!</h1>
-        <p>안녕하세요! 홈페이지에 오신 것을 환영합니다.</p>
+    <div class="container mt-4" style="padding-top: 90px; text-align :center">
+    <h1>모두의 레시피</h1>
+<p style="font-size: 35px; color: #333; font-family: 'Arial', sans-serif; font-weight: bold; text-align: center; margin: 20px;">
+    맛있는 순간, 공유의 기쁨. 여러분의 요리 이야기가 시작되는 곳  </p>
+
+
         <hr>
         <!-- static 폴더가 기본 폴더가 됨 -->
-        <img src="/upload/shin.png" class="img-fluid" alt="Shin 이미지">
+	<img src="/upload/logo.png">
     </div>
 
     <!-- 부트스트랩 JS 및 Popper.js, jQuery CDN을 사용하는 경우 아래 스크립트 추가 -->

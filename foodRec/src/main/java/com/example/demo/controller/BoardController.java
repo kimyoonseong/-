@@ -2,6 +2,7 @@ package com.example.demo.controller;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,13 +22,17 @@ import com.example.demo.service.BoardService;
 
 import jakarta.servlet.ServletContext;
 import lombok.extern.slf4j.Slf4j;
+import software.amazon.awssdk.core.sync.RequestBody;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
 @Slf4j
 @Controller
 @RequestMapping("/board")
 public class BoardController {
 	private BoardService service;
-	
+	@Autowired
+	private S3Client s3Client;
 	@Autowired
 	private ServletContext servletContext; // 현재 파일이 실행중인 경로 등을 상대경로로 사용하기 위해
 	
@@ -46,7 +51,7 @@ public class BoardController {
 	
 	// 레시피를 form으로 받아서 전달
 	@PostMapping("/regist")
-	public String registBoard(BoardDto boardDto) {
+	public String registBoard(BoardDto boardDto, Model model) {
 		MultipartFile imageFile = boardDto.getImage();
 		String originalFilename = imageFile.getOriginalFilename();
 		String uploadDir = servletContext.getRealPath("/upload/"); // 현재 JSP 파일의 실행중 위치 + getRealPath의 파라미터로 삽입한 경로
@@ -56,13 +61,24 @@ public class BoardController {
 		String filePath = uploadDir + originalFilename;
 		System.out.println(filePath);
 		try {
-			imageFile.transferTo(new File(filePath));
+			PutObjectRequest request = PutObjectRequest.builder()
+					.bucket("upload") // 파일을 집어넣을 버킷(폴더)
+					.key(originalFilename) // 파일명
+					.build(); // 요청을 작성 (어느 버켓에, 어떤 이름으로 저장할지)
+			// 객체 스토리지 클라이언트에게 요청과 파일(바이트)을 보내는 명령
+			System.out.println(request.toString());
+			s3Client.putObject(request, RequestBody.fromBytes(imageFile.getBytes()));
+			
+			boardDto.setImagePath(originalFilename); // Set the image path
+			service.writeBoard(boardDto);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-	
-		boardDto.setImagePath(originalFilename); // Set the image path
-		service.writeBoard(boardDto);
+		
+		
+		
+		
+		
 		return "redirect:/";
 	}
 	// 레시피 목록 출력
@@ -71,12 +87,18 @@ public class BoardController {
 		page--;
 		Page<Board> pageInfo = service.listBoard(page);
 		model.addAttribute("pageInfo", pageInfo);
-		
-		log.debug("page: {}",page);
-		log.debug("pageInfo: {}",pageInfo);
 		return "board/list";
-
 	} 
+	@GetMapping("/search")
+	public String search(@RequestParam(name = "query", required = false) String query, Model model) {
+	    if (query != null) {
+	        List<Board> searchResults = service.searchByTitle(query);
+	        model.addAttribute("searchResults", searchResults);
+	    }
+	    return "board/searchResults";
+	}
+
+	
 	//특정 레시피 조회 
 	@GetMapping("/detail")
 	public String detail(@RequestParam int no, Model model) {
@@ -119,7 +141,7 @@ public class BoardController {
 	
 	 @GetMapping("/test")
 	    public String showTestPage() {
-	        return "/board/food"; // 이 부분에서 "test"는 test.jsp 파일의 이름일 수 있습니다.
+	        return "/board/test"; // 이 부분에서 "test"는 test.jsp 파일의 이름일 수 있습니다.
 	    }
 	
 	//좋아요기능
@@ -136,15 +158,27 @@ public class BoardController {
 			return "redirect:/board/detail?no="+boardId;
 		}
 		//레시피 랭킹 목록 페이지
-//		@GetMapping("/Rank")  
-//		public String Rank(@RequestParam(required = false, defaultValue =  "1") Integer page, Model model) { 
-//			page--;
-//			Page<Board> pageInfo = service.listRankBoard(page);
-//			model.addAttribute("pageInfo", pageInfo);
-//			
-//			log.debug("page: {}",page);
-//			log.debug("pageInfo: {}",pageInfo);
-//			return "board/list";
-	//
-//		}
+
+		@GetMapping("/rank")  
+		public String Rank(@RequestParam(required = false, defaultValue =  "1") Integer page, Model model) { 
+			page--;
+			Page<Board> pageInfo = service.listRankBoard(page);
+			model.addAttribute("pageInfo", pageInfo);
+			
+			//log.debug("page: {}",page);
+			//log.debug("pageInfo: {}",pageInfo);
+			return "/board/rank";
+	
+		}
+		//조회수 표시
+		@PostMapping("/views")
+	    public String getBoardDetail(@RequestParam("boardId") Integer boardId) {
+			System.out.println("-------------------------------------------나옴");
+	        //if ("increaseViews".equals(action)) {
+	            service.increaseViews(boardId);
+	        //}
+	        
+	        
+	        return "redirect:/board/detail?no="+boardId;
+	    }
 }
